@@ -5,6 +5,7 @@ const logger = require('morgan');
 const path = require('path');
 const router = require('./routes/index');
 const { auth } = require('express-openid-connect');
+const fs = require('fs');
 
 dotenv.load();
 
@@ -17,9 +18,17 @@ app.use(logger('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+const privateKey = fs.readFileSync(path.join(__dirname, 'private.pem'), 'utf8');
+
 const config = {
   authRequired: false,
-  auth0Logout: true
+  auth0Logout: true,
+  authorizationParams: {
+     response_type: 'code',
+     scope: 'openid profile'
+  },
+  clientAuthMethod: 'private_key_jwt',
+  clientAssertionSigningKey: privateKey
 };
 
 const port = process.env.PORT || 3000;
